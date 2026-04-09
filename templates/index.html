@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Fuerza Neta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <h1 class="text-3xl font-bold mb-6">Calculadora de Fuerza Neta</h1>
+
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div>
+        <label class="block font-medium mb-1">q0</label>
+        <input id="q0" type="number" step="any" class="w-full border rounded-xl p-3" />
+      </div>
+      <div>
+        <label class="block font-medium mb-1">x0</label>
+        <input id="x0" type="number" step="any" class="w-full border rounded-xl p-3" />
+      </div>
+      <div>
+        <label class="block font-medium mb-1">y0</label>
+        <input id="y0" type="number" step="any" class="w-full border rounded-xl p-3" />
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold">Cargas</h2>
+      <button
+        id="addChargeBtn"
+        type="button"
+        class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700"
+      >
+        Agregar carga
+      </button>
+    </div>
+
+    <div id="chargesContainer" class="space-y-4 mb-6"></div>
+
+    <button
+      id="calculateBtn"
+      type="button"
+      class="bg-black text-white px-5 py-3 rounded-xl hover:opacity-90"
+    >
+      Calcular
+    </button>
+
+    <div id="message" class="mt-6"></div>
+
+    <div id="result" class="mt-6 hidden border rounded-2xl p-4 bg-slate-50">
+      <h2 class="text-xl font-semibold mb-3">Resultado</h2>
+      <p><strong>Fx:</strong> <span id="fx"></span></p>
+      <p><strong>Fy:</strong> <span id="fy"></span></p>
+      <p><strong>Magnitud:</strong> <span id="magnitud"></span></p>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
