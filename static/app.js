@@ -12,6 +12,7 @@ class App {
   constructor() {
     this._loadEventListeners();
     this._crearCargaVacia();
+    addChargeBtn.classList.add("hidden");
   }
 
   _loadEventListeners() {
@@ -19,6 +20,7 @@ class App {
     calculateBtn.addEventListener("click", () => this.calculate());
   }
 
+  //Crear una carga vacia con inputs para q, x, y y un boton de eliminar, y agregarla al contenedor de cargas
   _crearCargaVacia() {
     const wrapper = document.createElement("div");
     wrapper.className =
@@ -67,6 +69,7 @@ class App {
     return parseFloat(document.getElementById(id).value);
   }
 
+  //Funcion para regresar las cargas del formulario en un formato [{q, x, y}, ...]
   cargarCargas() {
     const filaCargas = document.querySelectorAll("#cargaRow");
     const cargas = [];
@@ -91,6 +94,7 @@ class App {
   async calculate() {
     this.clearMessage();
     resultDiv.classList.add("hidden");
+    addChargeBtn.classList.remove("hidden");
 
     try {
       const q0 = this.getNumberValue("q0");
