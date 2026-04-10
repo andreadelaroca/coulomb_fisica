@@ -1,4 +1,5 @@
 //Variables globales
+//Para correr la app 'uvicorn main:app --reload'
 const chargesContainer = document.getElementById("chargesContainer");
 const addChargeBtn = document.getElementById("addChargeBtn");
 const calculateBtn = document.getElementById("calculateBtn");
