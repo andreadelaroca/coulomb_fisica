@@ -11,18 +11,43 @@ const magnitudSpan = document.getElementById("magnitud");
 
 class App {
   constructor() {
+    if (!this._validarElementosBase()) {
+      return;
+    }
+
     this._loadEventListeners();
     this._crearCargaVacia();
     addChargeBtn.classList.add("hidden");
   }
 
+  _validarElementosBase() {
+    return (
+      chargesContainer &&
+      addChargeBtn &&
+      calculateBtn &&
+      messageDiv &&
+      resultDiv &&
+      fxSpan &&
+      fySpan &&
+      magnitudSpan
+    );
+  }
+
   _loadEventListeners() {
+    if (!addChargeBtn || !calculateBtn) {
+      return;
+    }
+
     addChargeBtn.addEventListener("click", () => this._crearCargaVacia());
     calculateBtn.addEventListener("click", () => this.calculate());
   }
 
   //Crear una carga vacia con inputs para q, x, y y un boton de eliminar, y agregarla al contenedor de cargas
   _crearCargaVacia() {
+    if (!chargesContainer) {
+      return;
+    }
+
     const wrapper = document.createElement("div");
     wrapper.className =
       "grid md:grid-cols-4 gap-4 items-end border rounded-2xl p-4";
@@ -47,14 +72,22 @@ class App {
     </div>
         `;
 
-    wrapper.querySelector(".remove-btn").addEventListener("click", () => {
-      wrapper.remove();
-    });
+    const removeBtn = wrapper.querySelector(".remove-btn");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", () => {
+        wrapper.remove();
+      });
+    }
+
     chargesContainer.appendChild(wrapper);
   }
 
   //------Funciones publicas-----------
   showMessage(text, isError = false) {
+    if (!messageDiv) {
+      return;
+    }
+
     messageDiv.innerHTML = `
     <div class="${isError ? "bg-red-100 text-red-700 border-red-300" : "bg-green-100 text-green-700 border-green-300"} border rounded-xl p-3">
      ${text}
@@ -62,12 +95,34 @@ class App {
   `;
   }
   clearMessage() {
+    if (!messageDiv) {
+      return;
+    }
+
     messageDiv.innerHTML = "";
   }
 
   //Obtener valor de un input por su id
   getNumberValue(id) {
-    return parseFloat(document.getElementById(id).value);
+    const input = document.getElementById(id);
+
+    if (!input) {
+      return NaN;
+    }
+
+    return parseFloat(input.value);
+  }
+
+  convertirNumeroE(input) {
+    const value = Number(input.value);
+    if (Number.isNaN(value)) {
+      return;
+    }
+
+    input.value = value.toLocaleString("fullwide", {
+      useGrouping: false,
+      maximumSignificantDigits: 15,
+    });
   }
 
   //Funcion para regresar las cargas del formulario en un formato [{q, x, y}, ...]
@@ -76,9 +131,18 @@ class App {
     const cargas = [];
 
     for (const fila of filaCargas) {
-      const q = parseFloat(fila.querySelector(".charge-q").value);
-      const x = parseFloat(fila.querySelector(".charge-x").value);
-      const y = parseFloat(fila.querySelector(".charge-y").value);
+      const qInput = fila.querySelector(".charge-q");
+      const xInput = fila.querySelector(".charge-x");
+      const yInput = fila.querySelector(".charge-y");
+
+      if (!qInput || !xInput || !yInput) {
+        alert("No se pudieron leer todas las cargas.");
+        return null;
+      }
+
+      const q = parseFloat(qInput.value);
+      const x = parseFloat(xInput.value);
+      const y = parseFloat(yInput.value);
 
       if (Number.isNaN(q) || Number.isNaN(x) || Number.isNaN(y)) {
         alert("Todas las cargas deben tener valores validos.");
@@ -93,6 +157,11 @@ class App {
 
   //Fetch a "/calcular" con los datos del formulario y mostrar resultado
   async calculate() {
+    if (!this._validarElementosBase()) {
+      alert("No se pudo iniciar correctamente la aplicacion.");
+      return;
+    }
+
     this.clearMessage();
     resultDiv.classList.add("hidden");
     addChargeBtn.classList.remove("hidden");
@@ -109,8 +178,21 @@ class App {
 
       const cargas = this.cargarCargas();
 
-      if (cargas.length === 0 || cargas === null) {
+      if (cargas === null) {
+        return;
+      }
+
+      if (cargas.length === 0) {
         alert("Debes agregar al menos una carga.");
+        return;
+      }
+
+      const hayCargaEnMismaPosicion = cargas.some(
+        (carga) => carga.x === x0 && carga.y === y0,
+      );
+
+      if (hayCargaEnMismaPosicion) {
+        alert("No puede haber una carga en la misma posicion que q0.");
         return;
       }
 
@@ -127,9 +209,29 @@ class App {
         }),
       });
 
-      const data = await res.json();
+      let data = null;
+
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("La respuesta del servidor no es valida.");
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || "No se pudo realizar el calculo.");
+      }
+
       if (!data.ok) {
-        throw new Error(data.error);
+        throw new Error(data.error || "No se pudo realizar el calculo.");
+      }
+
+      if (
+        !data.resultado ||
+        !Number.isFinite(Number(data.resultado.fx)) ||
+        !Number.isFinite(Number(data.resultado.fy)) ||
+        !Number.isFinite(Number(data.resultado.magnitud))
+      ) {
+        throw new Error("El resultado recibido no es valido.");
       }
 
       fxSpan.textContent = Number(data.resultado.fx).toExponential(4);
@@ -141,7 +243,11 @@ class App {
       resultDiv.classList.remove("hidden");
       this.showMessage("Calculo realizado correctamente.");
     } catch (error) {
-      this.showMessage(error.message, true);
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : "Ocurrio un error inesperado.";
+      alert(errorMessage);
     }
   }
 }
