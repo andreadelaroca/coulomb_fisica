@@ -125,6 +125,23 @@ class App {
     });
   }
 
+  formatearResultado(valor) {
+    const numero = Number(valor);
+
+    if (!Number.isFinite(numero)) {
+      return "";
+    }
+
+    const resultado = new Intl.NumberFormat("en-US", {
+      useGrouping: false,
+      notation: "standard",
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    }).format(numero);
+
+    return resultado === "-0.0000" ? "0.0000" : resultado;
+  }
+
   //Funcion para regresar las cargas del formulario en un formato [{q, x, y}, ...]
   cargarCargas() {
     const filaCargas = document.querySelectorAll("#cargaRow");
@@ -234,10 +251,10 @@ class App {
         throw new Error("El resultado recibido no es valido.");
       }
 
-      fxSpan.textContent = Number(data.resultado.fx).toExponential(4);
-      fySpan.textContent = Number(data.resultado.fy).toExponential(4);
-      magnitudSpan.textContent = Number(data.resultado.magnitud).toExponential(
-        4,
+      fxSpan.textContent = this.formatearResultado(data.resultado.fx);
+      fySpan.textContent = this.formatearResultado(data.resultado.fy);
+      magnitudSpan.textContent = this.formatearResultado(
+        data.resultado.magnitud,
       );
 
       resultDiv.classList.remove("hidden");
